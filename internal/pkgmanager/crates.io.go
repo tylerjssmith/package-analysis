@@ -49,6 +49,7 @@ func getCratesArchiveFilename(pkgName, version, _ string) string {
 
 var cratesPkgManager = PkgManager{
 	ecosystem:       pkgecosystem.CratesIO,
+	normalizeName:   strings.ToLower,
 	latestVersion:   getCratesLatest,
 	archiveURL:      getCratesArchiveURL,
 	archiveFilename: getCratesArchiveFilename,

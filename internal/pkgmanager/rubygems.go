@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/ossf/package-analysis/pkg/api/pkgecosystem"
 )
@@ -42,6 +43,7 @@ func getRubyGemsArchiveURL(pkgName, version string) (string, error) {
 
 var rubygemsPkgManager = PkgManager{
 	ecosystem:       pkgecosystem.RubyGems,
+	normalizeName:   strings.ToLower,
 	latestVersion:   getRubyGemsLatest,
 	archiveURL:      getRubyGemsArchiveURL,
 	archiveFilename: defaultArchiveFilename,

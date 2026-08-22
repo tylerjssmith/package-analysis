@@ -9,6 +9,7 @@ import (
 // defaultCommand returns the path (in the default sandbox image)
 // of the default dynamic analysis command for the ecosystem
 var defaultCommand = map[pkgecosystem.Ecosystem]string{
+	pkgecosystem.CRAN:      "/usr/local/bin/analyze-r.R",
 	pkgecosystem.CratesIO:  "/usr/local/bin/analyze-rust.py",
 	pkgecosystem.NPM:       "/usr/local/bin/analyze-node.js",
 	pkgecosystem.Packagist: "/usr/local/bin/analyze-php.php",

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"path"
 	"path/filepath"
-	"strings"
 
 	"github.com/ossf/package-analysis/pkg/api/pkgecosystem"
 )
@@ -15,6 +14,7 @@ var ErrNoArchiveURL = errors.New("archive URL not found")
 // PkgManager represents how packages from a common ecosystem are accessed.
 type PkgManager struct {
 	ecosystem       pkgecosystem.Ecosystem
+	normalizeName   func(name string) string
 	latestVersion   func(name string) (string, error)
 	archiveURL      func(name, version string) (string, error)
 	archiveFilename func(name, version, downloadURL string) string
@@ -28,6 +28,7 @@ var (
 		rubygemsPkgManager.ecosystem:  &rubygemsPkgManager,
 		packagistPkgManager.ecosystem: &packagistPkgManager,
 		cratesPkgManager.ecosystem:    &cratesPkgManager,
+		cranPkgManager.ecosystem:      &cranPkgManager,
 	}
 )
 
@@ -55,7 +56,7 @@ func (p *PkgManager) Ecosystem() pkgecosystem.Ecosystem {
 }
 
 func (p *PkgManager) Latest(name string) (*Pkg, error) {
-	name = normalizePkgName(name)
+	name = p.normalize(name)
 	version, err := p.latestVersion(name)
 	if err != nil {
 		return nil, err
@@ -69,7 +70,7 @@ func (p *PkgManager) Latest(name string) (*Pkg, error) {
 
 func (p *PkgManager) Local(name, version, localPath string) *Pkg {
 	return &Pkg{
-		name:    normalizePkgName(name),
+		name:    p.normalize(name),
 		version: version,
 		local:   localPath,
 		manager: p,
@@ -78,7 +79,7 @@ func (p *PkgManager) Local(name, version, localPath string) *Pkg {
 
 func (p *PkgManager) Package(name, version string) *Pkg {
 	return &Pkg{
-		name:    normalizePkgName(name),
+		name:    p.normalize(name),
 		version: version,
 		manager: p,
 	}
@@ -128,6 +129,13 @@ func (p *PkgManager) ExtractArchive(archivePath, outputDir string) error {
 	return fmt.Errorf("archive extraction not implemented for %s", p.Ecosystem())
 }
 
-func normalizePkgName(pkg string) string {
-	return strings.ToLower(pkg)
+// normalize converts a package name into the canonical form used by this
+// ecosystem's registry. Ecosystems that do not set normalizeName use names
+// exactly as given, which is required where package names are case sensitive,
+// as they are on CRAN.
+func (p *PkgManager) normalize(name string) string {
+	if p.normalizeName == nil {
+		return name
+	}
+	return p.normalizeName(name)
 }

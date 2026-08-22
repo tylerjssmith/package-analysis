@@ -58,6 +58,11 @@ func TestEcosystemUnmarshalText(t *testing.T) {
 			want:  pkgecosystem.CratesIO,
 		},
 		{
+			name:  "cran",
+			input: []byte("cran"),
+			want:  pkgecosystem.CRAN,
+		},
+		{
 			name:    "unsupported",
 			input:   []byte("this is a test"),
 			wantErr: true,

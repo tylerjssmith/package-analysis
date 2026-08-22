@@ -100,6 +100,7 @@ func getPackagistArchiveFilename(pkgName, version, _ string) string {
 
 var packagistPkgManager = PkgManager{
 	ecosystem:       pkgecosystem.Packagist,
+	normalizeName:   strings.ToLower,
 	latestVersion:   getPackagistLatest,
 	archiveURL:      getPackagistArchiveURL,
 	archiveFilename: getPackagistArchiveFilename,

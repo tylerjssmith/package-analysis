@@ -80,6 +80,7 @@ func getPyPIArchiveURL(pkgName, version string) (string, error) {
 
 var pypiPkgManager = PkgManager{
 	ecosystem:       pkgecosystem.PyPI,
+	normalizeName:   strings.ToLower,
 	latestVersion:   getPyPILatest,
 	archiveURL:      getPyPIArchiveURL,
 	archiveFilename: defaultArchiveFilename,

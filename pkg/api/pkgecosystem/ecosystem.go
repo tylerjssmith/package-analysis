@@ -14,6 +14,7 @@ type Ecosystem string
 
 const (
 	None      Ecosystem = ""
+	CRAN      Ecosystem = "cran"
 	CratesIO  Ecosystem = "crates.io"
 	NPM       Ecosystem = "npm"
 	Packagist Ecosystem = "packagist"
@@ -33,6 +34,7 @@ func Unsupported(name string) error {
 
 // SupportedEcosystems is a list of all the ecosystems supported.
 var SupportedEcosystems = []Ecosystem{
+	CRAN,
 	CratesIO,
 	NPM,
 	Packagist,
@@ -103,7 +105,7 @@ func ParsePurlType(purlType string) (Ecosystem, error) {
 	case "gem":
 		return RubyGems, nil
 	default:
-		// we use the same name for NPM and PyPI as the purl type string
+		// we use the same name for CRAN, NPM and PyPI as the purl type string
 		return Parse(purlType)
 	}
 }

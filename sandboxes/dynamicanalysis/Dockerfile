@@ -29,6 +29,11 @@ RUN curl -fsSL "https://pkgs.k8s.io/core:/stable:/${K8S_VERSION}/deb/Release.key
 RUN curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/trusted.gpg.d/nodesource.gpg && \
     echo "deb https://deb.nodesource.com/node_${NODE_MAJOR}.x nodistro main" > /etc/apt/sources.list.d/nodesource.list
 
+# install repo for R. Ubuntu's own r-base is two years behind, which shows up as
+# spurious install failures for packages that require a newer R.
+RUN curl -fsSL https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | gpg --dearmor -o /etc/apt/trusted.gpg.d/cran_ubuntu_key.gpg && \
+    echo "deb https://cloud.r-project.org/bin/linux/ubuntu noble-cran40/" > /etc/apt/sources.list.d/cran.list
+
 # install keys for powershell
 RUN curl -fsSL "https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb" -o /setup/packages-microsoft-prod.deb && \
 	dpkg -i /setup/packages-microsoft-prod.deb
@@ -130,6 +135,13 @@ WORKDIR /setup/rust
 RUN apt-get update && apt-get install -y --no-install-recommends \
 	rust-all
 
+#
+# R setup
+#
+WORKDIR /setup/r
+RUN apt-get update && apt-get install -y --no-install-recommends \
+	r-base-dev
+
 
 WORKDIR /app
 RUN cargo init
@@ -157,8 +169,16 @@ ENV CARGO_HOME="/usr/local/cargo"
 # NPM
 ENV NODE_PATH="/app/node_modules"
 
+# R
+# Analysed packages and their dependencies are installed here, separately from
+# the recommended packages that ship with R. The directory has to exist: R
+# silently drops a non-existent entry from R_LIBS_USER, which would put the base
+# library back at the head of .libPaths().
+ENV R_LIBS_USER="/app/R/library"
+RUN mkdir -p /app/R/library
+
 # Test stuff
-RUN ruby --version && php --version && python3 --version && pip --version && node --version && npm --version && rustc --version && cargo --version
+RUN ruby --version && php --version && python3 --version && pip --version && node --version && npm --version && rustc --version && cargo --version && Rscript --version
 
 
 # Add analysis scripts
@@ -168,8 +188,9 @@ COPY analyze-node.js .
 COPY analyze-python.py .
 COPY analyze-ruby.rb .
 COPY analyze-rust.py .
+COPY analyze-r.R .
 
-RUN chmod 755 analyze-php.php analyze-node.js analyze-python.py analyze-ruby.rb analyze-rust.py
+RUN chmod 755 analyze-php.php analyze-node.js analyze-python.py analyze-ruby.rb analyze-rust.py analyze-r.R
 
 # Ensure that this the last WORKDIR statement, otherwise things like cargo will break
 WORKDIR /app

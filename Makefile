@@ -197,6 +197,8 @@ test_dynamic_analysis:
 	scripts/run_analysis.sh -mode dynamic -nopull -ecosystem crates.io -package itoa
 	@echo -e "\n##\n## Test RubyGems \n##\n"
 	scripts/run_analysis.sh -mode dynamic -nopull -ecosystem rubygems -package guwor_palindrome
+	@echo -e "\n##\n## Test CRAN \n##\n"
+	scripts/run_analysis.sh -mode dynamic -nopull -ecosystem cran -package jsonlite
 	@echo "Dynamic analysis test passed"
 
 .PHONY: test_static_analysis
